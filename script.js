@@ -1,13 +1,20 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
+
     const tg = window.Telegram.WebApp;
     if (tg) {
         tg.ready();
         tg.expand();
     }
 
-    const N8N_BASE_URL = 'https://handsomely-thrilled-curassow.cloudpub.ru/webhook'; 
+    const N8N_BASE_URL = 'https://handsomely-thrilled-curassow.cloudpub.ru/webhook';
     const loader = document.getElementById('loader');
     const productListContainer = document.getElementById('product-list');
+    const arViewer = document.getElementById('ar-viewer');
+
+    if (!loader || !productListContainer || !arViewer) {
+        console.error('Не найдены необходимые элементы: #loader, #product-list или #ar-viewer');
+        return;
+    }
 
     function scrambleTimestamp() {
         const timestampStr = Math.floor(Date.now() / 1000).toString();
@@ -32,7 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `${N8N_BASE_URL}/models?p=${encodeURIComponent(productName)}&f=${encodeURIComponent(fileName)}&t=${scrambledTime}`;
     }
 
-
     async function fetchWithUrl(url) {
         const response = await fetch(url, { cache: 'no-cache' });
         if (!response.ok) {
@@ -43,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadCatalog() {
         try {
-            const listUrl = `${N8N_BASE_URL}/models?t=${scrambleTimestamp()}`; 
+            const listUrl = `${N8N_BASE_URL}/models?t=${scrambleTimestamp()}`;
             const response = await fetchWithUrl(listUrl);
             const data = await response.json();
 
@@ -97,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `;
                     productListContainer.appendChild(card);
                 } catch (productError) {
-                     console.error(`Не удалось загрузить данные для товара "${name}":`, productError);
+                    console.error(`Не удалось загрузить данные для товара "${name}":`, productError);
                 }
             }
         } catch (error) {
@@ -124,9 +130,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const modelUrlGlb = createProductFileUrl(productName, 'model.glb');
             const modelUrlUsdz = createProductFileUrl(productName, 'model.usdz');
             
-            const arViewer = document.getElementById('ar-viewer');
             arViewer.src = modelUrlGlb;
             arViewer.iosSrc = modelUrlUsdz;
+            arViewer.ar = true;
+            arViewer.arModes = "webxr scene-viewer quick-look";
             
             try {
                 await arViewer.activateAR();
