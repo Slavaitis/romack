@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadCatalog() {
         try {
-            const listUrl = `${N8N_BASE_URL}/models-list?t=${scrambleTimestamp()}`; 
+            const listUrl = `${N8N_BASE_URL}/models?t=${scrambleTimestamp()}`; 
             const response = await fetchWithUrl(listUrl);
             const data = await response.json();
 
