@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <p class="price">${price || 'Цена не указана'}</p>
                             <p class="description">${description || 'Описание отсутствует.'}</p>
                             <div class="actions">
-                                <button class="more-button">Больше</button>
+                                <div class="more-button">Узнать больше <span class="arrow">&#9662;</span></div>
                                 <button class="ar-button" data-product="${name}">Посмотреть в AR</button>
                             </div>
                         </div>
@@ -107,17 +107,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     productListContainer.addEventListener('click', async (event) => {
-        const target = event.target;
+        const moreButton = event.target.closest('.more-button');
+        const arButton = event.target.closest('.ar-button');
 
-        if (target.classList.contains('more-button')) {
-            const descriptionEl = target.closest('.product-card').querySelector('.description');
+        if (moreButton) {
+            const card = moreButton.closest('.product-card');
+            const descriptionEl = card.querySelector('.description');
             const isVisible = descriptionEl.style.display === 'block';
+            
             descriptionEl.style.display = isVisible ? 'none' : 'block';
-            target.textContent = isVisible ? 'Больше' : 'Скрыть';
+            moreButton.classList.toggle('active', !isVisible);
         }
 
-        if (target.classList.contains('ar-button')) {
-            const productName = target.dataset.product;
+        if (arButton) {
+            const productName = arButton.dataset.product;
             const modelUrlGlb = createProductFileUrl(productName, 'model.glb');
             const modelUrlUsdz = createProductFileUrl(productName, 'model.usdz');
             
