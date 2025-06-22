@@ -5,11 +5,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         tg.expand();
     }
 
-    const N8N_BASE_URL = 'https://handsomely-thrilled-curassow.cloudpub.ru/webhook'; // Убедитесь, что это ваш актуальный URL
+    const N8N_BASE_URL = 'https://handsomely-thrilled-curassow.cloudpub.ru/webhook'; 
     const loader = document.getElementById('loader');
     const productListContainer = document.getElementById('product-list');
 
-    // Функция для "перемешивания" времени
     function scrambleTimestamp() {
         const timestampStr = Math.floor(Date.now() / 1000).toString();
         let scrambled = '';
@@ -28,9 +27,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         return scrambled;
     }
 
-    async function fetchWithScrambledTime(url) {
+    function createProductFileUrl(productName, fileName) {
         const scrambledTime = scrambleTimestamp();
-        const response = await fetch(`${url}?t=${scrambledTime}`, { cache: 'no-cache' });
+        return `${N8N_BASE_URL}/models?p=${encodeURIComponent(productName)}&f=${encodeURIComponent(fileName)}&t=${scrambledTime}`;
+    }
+
+
+    async function fetchWithUrl(url) {
+        const response = await fetch(url, { cache: 'no-cache' });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -39,20 +43,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadCatalog() {
         try {
-            const response = await fetchWithScrambledTime(`${N8N_BASE_URL}/models`);
+            const listUrl = `${N8N_BASE_URL}/models-list?t=${scrambleTimestamp()}`; 
+            const response = await fetchWithUrl(listUrl);
             const data = await response.json();
 
-            // --- НОВЫЙ, БОЛЕЕ НАДЕЖНЫЙ БЛОК ПРОВЕРКИ ---
-            // Проверяем, что данные от n8n пришли в ожидаемом формате: [{ json: { stdout: "..." } }]
             if (!Array.isArray(data) || data.length === 0 || !data[0].json || typeof data[0].json.stdout === 'undefined') {
                 console.error('Получены некорректные данные от n8n:', JSON.stringify(data));
                 loader.textContent = 'Ошибка: сервер вернул данные в неожиданном формате.';
-                if (tg) {
-                    tg.showAlert('Произошла внутренняя ошибка при загрузке каталога. Обратитесь в поддержку и покажите им ошибку в консоли браузера.');
-                }
-                return; // Прерываем выполнение функции
+                return;
             }
-            // --- КОНЕЦ НОВОГО БЛОКА ---
 
             const productNames = data[0].json.stdout.split('\n').filter(name => name);
 
@@ -65,13 +64,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             productListContainer.innerHTML = '';
 
             for (const name of productNames) {
-                const previewUrl = `${N8N_BASE_URL}/models/${name}/preview.png`;
-                const descriptionUrl = `${N8N_BASE_URL}/models/${name}/description.txt`;
+                const previewUrl = createProductFileUrl(name, 'preview.png');
+                const descriptionUrl = createProductFileUrl(name, 'description.txt');
 
                 try {
                     const [previewResponse, descriptionResponse] = await Promise.all([
-                        fetchWithScrambledTime(previewUrl),
-                        fetchWithScrambledTime(descriptionUrl)
+                        fetchWithUrl(previewUrl),
+                        fetchWithUrl(descriptionUrl)
                     ]);
                     
                     const previewBlob = await previewResponse.blob();
@@ -117,9 +116,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (target.classList.contains('ar-button')) {
             const productName = target.dataset.product;
-            const scrambledTime = scrambleTimestamp();
-            const modelUrlGlb = `${N8N_BASE_URL}/models/${productName}/model.glb?t=${scrambledTime}`;
-            const modelUrlUsdz = `${N8N_BASE_URL}/models/${productName}/model.usdz?t=${scrambledTime}`;
+            const modelUrlGlb = createProductFileUrl(productName, 'model.glb');
+            const modelUrlUsdz = createProductFileUrl(productName, 'model.usdz');
             
             const arViewer = document.getElementById('ar-viewer');
             arViewer.src = modelUrlGlb;
