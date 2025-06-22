@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     tg.ready();
     tg.expand();
 
-    const N8N_BASE_URL = 'https://handsomely-thrilled-curassow.cloudpub.ru/webhook-test'; // ВАЖНО: Укажите ваш URL
+    const N8N_BASE_URL = 'https://handsomely-thrilled-curassow.cloudpub.ru/webhook'; // ВАЖНО: Укажите ваш URL
 
     const loader = document.getElementById('loader');
     const productListContainer = document.getElementById('product-list');
