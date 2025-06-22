@@ -82,7 +82,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.innerHTML = `
-                        <img src="${previewSrc}" alt="${title || name}">
+                        <div class="img-container">
+                            <img src="${previewSrc}" alt="${title || name}">
+                        </div>
                         <div class="product-info">
                             <h3>${title || 'Без названия'}</h3>
                             <p class="price">${price || 'Цена не указана'}</p>
